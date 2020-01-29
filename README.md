@@ -12,11 +12,13 @@ Available Payloads are:
 - ScreenTunnel
 - TextSpam
 
-```usage: main.exe [payload] [loops] [delay] {text}
+```
+usage: main.exe [payload] [loops] [delay] {text}
 payloads:
 mouse - mouse glitching around
 glitch - screen glitches
 tunnel - screen tunnel effect
 invert - invert screen colors
 errorcursor - draw error on cursor
-text - draw text on random position```
+text - draw text on random position
+```
