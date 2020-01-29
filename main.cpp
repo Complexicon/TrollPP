@@ -4,7 +4,7 @@
 #include <time.h>
 
 using namespace std;
-
+ 
 const int MOUSESHAKE = 30;
 POINT cursor;
 HDC hdc = GetDC(0);
