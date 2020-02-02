@@ -1,14 +1,21 @@
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#pragma once
 
-#include <stdlib.h>
+#pragma comment(linker, \
+    "\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+#include "utils.h"
 #include <iostream>
-#include <windows.h>
+#include <map>
+#include <math.h>
+#include <stdlib.h>
 #include <time.h>
-#include <wincrypt.h>
+#include <windows.h>
 
-#include "bs.cpp"
-#include "payloads.cpp"
-#include "msgbox.cpp"
+const int MOUSESHAKE = 30;
 
-#endif
+int w = GetSystemMetrics(SM_CXSCREEN);
+int h = GetSystemMetrics(SM_CYSCREEN);
+
+HDC hdc = GetDC(0);
