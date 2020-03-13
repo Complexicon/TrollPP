@@ -1,7 +1,11 @@
-#include "main.h"
-#include "bs.h"
-//#include "cxxopts.hpp"
-#include "payloads.h"
+#pragma comment(linker, \
+    "\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+#include "payloads.hpp"
+#include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -24,29 +28,30 @@ void printHelp(const char* a)
     printf("killWindowsNow - very bad\n");
 }
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 
-    setWinTitle(L"Pferdesalami");
+    setWinTitle(L"Gay");
 
     SetTextColor(hdc, RGB(255, 0, 0));
     SetBkColor(hdc, RGB(0, 0, 0));
     SetBkMode(hdc, OPAQUE);
 
-    map<string, void (*)()> funcMap;
+    map<string, void (*)()> funcMap = {
+        { "mouse", moveMouse },
+        { "glitch", screenGlitch },
+        { "tunnel", screenTunnel },
+        { "invert", screenInvert },
+        { "errorcursor", drawErrorCursor },
+        { "msgbox", spawnMsgBox },
+        { "earthquake", payloadEarthquake },
+        { "melt", melt },
+        { "soundspam", payloadSound },
+        { "epilepsy", epilepsy },
+        { "killWindowsNow", Utils::bluescreen },
+        { "trapmouse", trapMouseForever },
 
-    funcMap["mouse"] = moveMouse;
-    funcMap["glitch"] = screenGlitch;
-    funcMap["tunnel"] = screenTunnel;
-    funcMap["invert"] = screenInvert;
-    funcMap["errorcursor"] = drawErrorCursor;
-    funcMap["msgbox"] = spawnMsgBox;
-    funcMap["earthquake"] = payloadEarthquake;
-    funcMap["melt"] = melt;
-    funcMap["soundspam"] = payloadSound;
-    funcMap["epilepsy"] = epilepsy;
-    funcMap["killWindowsNow"] = crash;
-    funcMap["trapmouse"] = trapMouseForever;
+    };
 
     string payload = "msgbox";
     int loops = 1;
@@ -84,6 +89,5 @@ int main(int argc, char** argv)
         printHelp(argv[0]);
         break;
     }
-    Sleep(1000);
     return 0;
 }

