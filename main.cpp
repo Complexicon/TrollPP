@@ -27,13 +27,16 @@ void printHelp(const char* a)
     printf("msgbox - spams messageboxes in random positions\n");
     printf("killWindowsNow - very bad\n");
     printf("msgboxmousefollow - msgboxes follow the mouse\n");
+    printf("wintitle - set all window titles to 'trolled'\n");
+}
+
+void winTitle()
+{
+    setWinTitle("trolled");
 }
 
 int main(int argc, char* argv[])
 {
-
-    setWinTitle(L"Gay");
-
     SetTextColor(hdc, RGB(255, 0, 0));
     SetBkColor(hdc, RGB(0, 0, 0));
     SetBkMode(hdc, OPAQUE);
@@ -52,6 +55,7 @@ int main(int argc, char* argv[])
         { "killWindowsNow", Utils::bluescreen },
         { "trapmouse", trapMouseForever },
         { "msgboxmousefollow", msgboxmousefollow },
+        { "wintitle", winTitle },
     };
 
     string payload = "msgbox";
