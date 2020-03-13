@@ -17,6 +17,7 @@ Available Payloads are:
 - Earthquake
 - Melt
 - TrapMouse
+- MessageBoxMouseFollow
 
 ```
 usage: main.exe [payload] [loops | inf for infinite] [delay] {text}
@@ -34,4 +35,5 @@ melt - screen melt effect
 earthquake - screen shaking
 msgbox - spams messageboxes in random positions
 killWindowsNow - very bad
+msgboxmousefollow - msgboxes follow the mouse
 ```
