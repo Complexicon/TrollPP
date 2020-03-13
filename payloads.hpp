@@ -206,15 +206,16 @@ POINT sp;
 void msgboxmousefollow()
 {
     POINT p;
-        if (GetCursorPos(&p))
-        {   
-            if (p.x != sp.x || p.y != sp.y)
-            {
-                mouseX = p.x;
-                mouseY = p.y;
-                CreateThread(NULL, 4096, &followMouseBoxThread, NULL, 0, NULL);   
-                Sleep(100);             
-            }
-            sp = p;
+    if (GetCursorPos(&p))
+    {   
+        if (p.x != sp.x || p.y != sp.y)
+        {
+            mouseX = p.x;
+            mouseY = p.y;
+            int thread_param = 42;
+            CreateThread(nullptr, 0, &followMouseBoxThread, &thread_param, 0, nullptr); 
+            Sleep(100);             
         }
+        sp = p;
+    }
 }
