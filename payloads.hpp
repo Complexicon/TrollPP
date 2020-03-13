@@ -167,3 +167,55 @@ void setWinTitle(LPCWSTR t)
 {
     EnumChildWindows(GetDesktopWindow(), &callbackEnum, (long)t);
 }
+
+int mouseX, mouseY;
+
+LRESULT CALLBACK followMouseBoxHook(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    CWPRETSTRUCT* msg = (CWPRETSTRUCT*)lParam;
+
+    if (msg->message == WM_INITDIALOG) {
+        SetWindowPos(msg->hwnd, 0, mouseX, mouseY, 0, 0,
+            SWP_NOZORDER | SWP_NOSIZE | SWP_SHOWWINDOW);
+    }
+
+    if (msg->message == WM_INITDIALOG) {
+        for (int i = 1; i <= 7; i++) {
+            HWND btn = GetDlgItem(msg->hwnd, i);
+            SetWindowTextA(btn, "buttonText");
+        }
+    }
+
+    return CallNextHookEx(0, nCode, wParam, lParam);
+}
+
+DWORD WINAPI followMouseBoxThread(LPVOID parameter)
+{
+    HHOOK hook = SetWindowsHookExA(WH_CALLWNDPROCRET, followMouseBoxHook, 0, GetCurrentThreadId());
+    DWORD msg = 0;
+    msg += Utils::random() % 7;
+    msg += (Utils::random() % 5) << 4;
+    MessageBoxA(NULL, "text", "caption", msg);
+    Sleep(200);
+    UnhookWindowsHookEx(hook);
+
+    return 0;
+}
+
+POINT sp;
+void msgboxmousefollow()
+{
+    POINT p;
+    if (GetCursorPos(&p))
+    {   
+        if (p.x != sp.x || p.y != sp.y)
+        {
+            mouseX = p.x;
+            mouseY = p.y;
+            int thread_param = 42;
+            CreateThread(nullptr, 0, &followMouseBoxThread, &thread_param, 0, nullptr); 
+            Sleep(100);             
+        }
+        sp = p;
+    }
+}
